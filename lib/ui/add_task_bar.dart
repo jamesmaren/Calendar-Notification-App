@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_calendar_todo_app/ui/theme.dart';
+import 'package:flutter_local_calendar_todo_app/ui/widgets/button.dart';
 import 'package:flutter_local_calendar_todo_app/ui/widgets/input_field.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,8 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _endTime = "9:30 PM";
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
@@ -19,10 +22,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
   List<int> remindList = [5, 10, 15, 20];
   String _selectedRepeat = "None";
   List<String> repeatList = ["None", "Daily", "Weekly", "Monthly"];
+  int _selectedColor = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.theme.backgroundColor,
       appBar: _appBar(context),
       body: Container(
         padding: const EdgeInsets.only(left: 20, right: 20),
@@ -33,8 +37,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 "Add Task",
                 style: HeadingStyle,
               ),
-              MyInputFied(hint: "Enter your title", title: "Title"),
-              MyInputFied(hint: "Enter your note", title: "Note"),
+              MyInputFied(
+                hint: "Enter your title",
+                title: "Title",
+                controller: _titleController,
+              ),
+              MyInputFied(
+                hint: "Enter your note",
+                title: "Note",
+                controller: _noteController,
+              ),
               MyInputFied(
                 hint: DateFormat.yMd().format(_selectedDate),
                 title: "date",
@@ -114,7 +126,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   hint: "$_selectedRepeat",
                   title: "Repear",
                   widget: DropdownButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.keyboard_arrow_down,
                       color: Colors.grey,
                     ),
@@ -139,11 +151,79 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         ),
                       );
                     }).toList(),
-                  ))
+                  )),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _colorPallete(),
+                  MyButton(label: "Create Task", onTap: () => _validDate())
+                ],
+              )
             ],
           ),
         ),
       ),
+    );
+  }
+
+  _validDate() {
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+      //add to database
+
+      Get.back();
+    } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
+      Get.snackbar("Required", "All fields are required !",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: pinkClr,
+          icon: Icon(Icons.warning_amber_rounded));
+    }
+  }
+
+  _colorPallete() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Color",
+          style: titleStyle,
+        ),
+        SizedBox(
+          height: 5.0,
+        ),
+        Wrap(
+            children: List<Widget>.generate(3, (int index) {
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedColor = index;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: CircleAvatar(
+                radius: 14,
+                backgroundColor: index == 0
+                    ? primaryClr
+                    : index == 1
+                        ? pinkClr
+                        : yellowClr,
+                child: _selectedColor == index
+                    ? Icon(
+                        Icons.done,
+                        color: Colors.white,
+                        size: 16,
+                      )
+                    : Container(),
+              ),
+            ),
+          );
+        }))
+      ],
     );
   }
 
