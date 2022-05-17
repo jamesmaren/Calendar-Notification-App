@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_calendar_todo_app/controller/task_controller.dart';
+import 'package:flutter_local_calendar_todo_app/models/task.dart';
 import 'package:flutter_local_calendar_todo_app/ui/theme.dart';
 import 'package:flutter_local_calendar_todo_app/ui/widgets/button.dart';
 import 'package:flutter_local_calendar_todo_app/ui/widgets/input_field.dart';
@@ -13,6 +15,7 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+  final TaskController _taskConroller = Get.put(TaskController());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -173,7 +176,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   _validDate() {
     if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
       //add to database
-
+      _addTaskToDb();
       Get.back();
     } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
       Get.snackbar("Required", "All fields are required !",
@@ -182,6 +185,22 @@ class _AddTaskPageState extends State<AddTaskPage> {
           colorText: pinkClr,
           icon: Icon(Icons.warning_amber_rounded));
     }
+  }
+
+  _addTaskToDb() async {
+    int value = await _taskConroller.addTask(
+        task: Task(
+      note: _noteController.text,
+      title: _titleController.text,
+      date: DateFormat.yMd().format(_selectedDate),
+      startTime: _startTime,
+      endTime: _endTime,
+      remind: _selectedRemind,
+      repeat: _selectedRepeat,
+      color: _selectedColor,
+      isCompleted: 0,
+    ));
+    print("My id is" + "$value");
   }
 
   _colorPallete() {
